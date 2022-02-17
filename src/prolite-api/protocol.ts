@@ -1,5 +1,6 @@
 export enum ProliteProtocol {
-  // add to this enum, never insert or reorder, or you'll break old setups
-  LH42UHS,
-  TE04
+  // don't change the enum values, only add them
+  // so as not to break old setupss
+  LH42UHS = 0,
+  TE04 = 1
 }
