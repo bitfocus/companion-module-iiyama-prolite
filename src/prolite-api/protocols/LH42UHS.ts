@@ -54,11 +54,9 @@ const videoSourceMap = new Map<ProliteVideoSource, number>([
 
 const reverseVideoSourceMap = new Map<number, ProliteVideoSource>();
 
+const ProliteLH42UHSPort = 5000;
 export default class ProliteLH42UHSApi implements ProliteApiImplementation {
-  // @ts-ignore
   private _host: string;
-  // @ts-ignore
-  private _port: number;
   private _client?: TClient;
   private _monitorId: number;
 
@@ -69,7 +67,6 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
 
   constructor(host: string, monitorId: number) {
     this._host = host;
-    this._port = 5000;
     this._monitorId = monitorId;
     if (reverseVideoSourceMap.size == 0) {
       for (var entry of videoSourceMap) {
@@ -101,7 +98,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
     client.socket.addListener('close', () => {
       this.killClient();
     });
-    await client.connect(this._port, this._host);
+    await client.connect(ProliteLH42UHSPort, this._host);
     this._client = client;
     return this._client;
   }
