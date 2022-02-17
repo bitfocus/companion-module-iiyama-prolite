@@ -22,29 +22,39 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
     this.setActions(this.actions);
   }
 
-  private _videoSubscriptions: number = 0;
-  private _powerSubscriptions: number = 0;
+  private _videoSubscriptions: Set<string> = new Set<string>();
+  private _powerSubscriptions: Set<string> = new Set<string>();
 
-  private get videoSubscriptions(): number {
-    return this._videoSubscriptions;
+  private addVideoSubscription(value: string) {
+    this._videoSubscriptions.add(value);
+    this.checkIfShouldBePollingVideo();
   }
 
-  private set videoSubscriptions(value: number) {
-    this._videoSubscriptions = value;
-    this.shouldBePollingVideo = value > 0;
+  private removeVideoSubscription(value: string) {
+    this._videoSubscriptions.delete(value);
+    this.checkIfShouldBePollingVideo();
+  }
+
+  private checkIfShouldBePollingVideo() {
+    this.shouldBePollingVideo = this._videoSubscriptions.size > 0;
     if (this.shouldBePollingVideo && !this.isPollingVideo) {
       this.pollVideoSource();
       // it stops by itself
     }
   }
 
-  private get powerSubscriptions(): number {
-    return this._powerSubscriptions;
+  private addPowerSubscription(value: string) {
+    this._powerSubscriptions.add(value);
+    this.checkIfShouldBePollingPower();
   }
 
-  private set powerSubscriptions(value: number) {
-    this._powerSubscriptions = value;
-    this.shouldBePollingPower = value > 0;
+  private removePowerSubscription(value: string) {
+    this._powerSubscriptions.delete(value);
+    this.checkIfShouldBePollingPower();
+  }
+
+  private checkIfShouldBePollingPower() {
+    this.shouldBePollingPower = this._powerSubscriptions.size > 0;
     if (this.shouldBePollingPower && !this.isPollingPower) {
       this.pollPowerState();
       // it stops by itself
@@ -265,11 +275,11 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
           // This callback will be called whenever companion wants to check if this feedback is 'active' and should affect the button style
           return this.activeInput == feedback.options['input']?.valueOf();
         },
-        subscribe: () => {
-          this.videoSubscriptions++;
+        subscribe: (feedback: CompanionFeedbackEvent) => {
+          this.addVideoSubscription(feedback.id);
         },
-        unsubscribe: () => {
-          this.videoSubscriptions--;
+        unsubscribe: (feedback: CompanionFeedbackEvent) => {
+          this.removeVideoSubscription(feedback.id);
         }
       },
       powerState: {
@@ -307,11 +317,11 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
           // This callback will be called whenever companion wants to check if this feedback is 'active' and should affect the button style
           return this.powerState == feedback.options['input']?.valueOf();
         },
-        subscribe: () => {
-          this.powerSubscriptions++;
+        subscribe: (feedback: CompanionFeedbackEvent) => {
+          this.addPowerSubscription(feedback.id);
         },
-        unsubscribe: () => {
-          this.powerSubscriptions--;
+        unsubscribe: (feedback: CompanionFeedbackEvent) => {
+          this.removePowerSubscription(feedback.id);
         }
       }
     });
