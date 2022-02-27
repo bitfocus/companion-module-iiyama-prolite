@@ -64,7 +64,7 @@ export default class ProliteTE04Api implements ProliteApiImplementation {
   private async write(message: string) {
     try {
       var buffer = Buffer.from(message);
-      console.log('Prolite Sending', buffer.toString('hex'));  
+//      console.log('Prolite Sending', buffer.toString('hex'));  
       var client = await this.connect();
       await client.write(buffer);
     } catch (e: any) {
@@ -90,7 +90,7 @@ export default class ProliteTE04Api implements ProliteApiImplementation {
         char = await client.read(1) as string; // set encoding to ascii so we'll get a string
         message += char;
       } while (char !== EOL);
-      console.log('Prolite Received ', Buffer.from(message).toString('hex'));  
+//      console.log('Prolite Received ', Buffer.from(message).toString('hex'));  
       return message;
     } catch (e: any) {
       this.killClient();

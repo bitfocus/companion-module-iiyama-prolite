@@ -1,34 +1,34 @@
 Arguments: 
-  /Users/bryan/.nvm/versions/node/v14.17.0/bin/node /Users/bryan/.yarn/bin/yarn.js add -D @types/promise-socket
+  /Users/bryan/.nvm/versions/node/v14.18.1/bin/node /Users/bryan/.yarn/bin/yarn.js add @types/arpscan
 
 PATH: 
-  /Users/bryan/.nvm/versions/node/v14.17.0/bin:/usr/local/opt/openjdk/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/bryan/.yarn/bin:/Users/bryan/.config/yarn/global/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin
+  /Users/bryan/.nvm/versions/node/v14.18.1/bin:/usr/local/opt/openjdk/bin:/Library/Frameworks/Python.framework/Versions/3.7/bin:/Users/bryan/.yarn/bin:/Users/bryan/.config/yarn/global/node_modules/.bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/share/dotnet:~/.dotnet/tools:/Library/Apple/usr/bin:/Library/Frameworks/Mono.framework/Versions/Current/Commands:/Applications/Xamarin Workbooks.app/Contents/SharedSupport/path-bin
 
 Yarn version: 
   1.22.17
 
 Node version: 
-  14.17.0
+  14.18.1
 
 Platform: 
   darwin x64
 
 Trace: 
-  Error: https://registry.yarnpkg.com/@types%2fpromise-socket: Not found
+  Error: https://registry.yarnpkg.com/@types%2farpscan: Not found
       at Request.params.callback [as _callback] (/Users/bryan/.yarn/lib/cli.js:67029:18)
       at Request.self.callback (/Users/bryan/.yarn/lib/cli.js:140883:22)
-      at Request.emit (events.js:376:20)
+      at Request.emit (events.js:400:28)
       at Request.<anonymous> (/Users/bryan/.yarn/lib/cli.js:141855:10)
-      at Request.emit (events.js:376:20)
+      at Request.emit (events.js:400:28)
       at IncomingMessage.<anonymous> (/Users/bryan/.yarn/lib/cli.js:141777:12)
-      at Object.onceWrapper (events.js:482:28)
-      at IncomingMessage.emit (events.js:388:22)
-      at endReadableNT (internal/streams/readable.js:1336:12)
+      at Object.onceWrapper (events.js:519:28)
+      at IncomingMessage.emit (events.js:412:35)
+      at endReadableNT (internal/streams/readable.js:1334:12)
       at processTicksAndRejections (internal/process/task_queues.js:82:21)
 
 npm manifest: 
   {
-    "name": "liyama-prolite",
+    "name": "iiyama-prolite",
     "description": "Iiyama Prolite module for Companion",
     "api_version": "1.0.0",
     "version": "1.0.0",
@@ -38,16 +38,23 @@ npm manifest:
       "prolite"
     ],
     "main": "dist/index.js",
-    "manufacturer": "Liyama",
+    "manufacturer": "Iiyama",
     "product": "Prolite",
     "shortname": "prolite",
-    "repository": "git@github.com:bitfocus/companion-module-liyama-prolite.git",
     "author": "Bryan Crotaz <bgcrotaz@hotmail.com>",
     "license": "MIT",
+    "homepage": "https://github.com/bitfocus/companion-module-iiyama-prolite#readme",
+    "bugs": {
+      "url": "https://github.com/bitfocus/companion-module-iiyama-prolite/issues"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://github.com/bitfocus/companion-module-iiyama-prolite.git"
+    },
     "private": false,
     "scripts": {
       "dev": "yarn build:watch",
-      "build": "npx rimraf dist && npx typescript@~4.2 -p tsconfig.build.json",
+      "build": "npx rimraf dist && npx -p typescript tsc -p tsconfig.build.json",
       "build:main": "tsc -p tsconfig.build.json",
       "build:watch": "tsc -p tsconfig.build.json --watch",
       "lint": "eslint . --ext .ts",
@@ -55,14 +62,17 @@ npm manifest:
       "test": "qunit --require ts-node/register 'test/**/*-test.ts'"
     },
     "dependencies": {
+      "arpscan": "^1.0.2",
+      "network-utils": "^0.0.0",
       "promise-socket": "^7.0.0",
-      "typescript": "^4.5.5"
+      "queue-promise": "^2.2.1"
     },
     "devDependencies": {
       "@types/node": "^17.0.14",
       "@types/qunit": "^2.11.3",
       "qunit": "^2.17.2",
-      "ts-node": "^10.4.0"
+      "ts-node": "^10.4.0",
+      "typescript": "^4.5.5"
     }
   }
 
@@ -107,9 +117,9 @@ Lockfile:
     integrity sha512-eZxlbI8GZscaGS7kkc/trHTT5xgrjH3/1n2JDwusC9iahPKWMRvRjJSAN5mCXviuTGQ/lHnhvv8Q1YTpnfz9gA==
   
   "@types/node@^17.0.14":
-    version "17.0.14"
-    resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.14.tgz#33b9b94f789a8fedd30a68efdbca4dbb06b61f20"
-    integrity sha512-SbjLmERksKOGzWzPNuW7fJM7fk3YXVTFiZWB/Hs99gwhk+/dnrQRPBQjPW9aO+fi1tAffi9PrwFvsmOKmDTyng==
+    version "17.0.18"
+    resolved "https://registry.yarnpkg.com/@types/node/-/node-17.0.18.tgz#3b4fed5cfb58010e3a2be4b6e74615e4847f1074"
+    integrity sha512-eKj4f/BsN/qcculZiRSujogjvp5O/k4lOW5m35NopjZM/QwLOR075a8pJW5hD+Rtdm2DaCVPENS6KtSQnUD6BA==
   
   "@types/qunit@^2.11.3":
     version "2.11.3"
@@ -131,10 +141,24 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/arg/-/arg-4.1.3.tgz#269fc7ad5b8e42cb63c896d5666017261c144089"
     integrity sha512-58S9QDqG0Xx27YwPSt9fJxivjYl432YCwfDMfZ+71RAqUrZef7LrKQZ3LHLOwCS4FLNBplP533Zx895SeOCHvA==
   
+  arpscan@^1.0.2:
+    version "1.0.2"
+    resolved "https://registry.yarnpkg.com/arpscan/-/arpscan-1.0.2.tgz#09ceb226ddc16c7d9d0dae7e2040bdafef66d677"
+    integrity sha512-zwpRnaLNAI+l81FH+i5sFWWKNwwQfDjS0BDiCRGWV9QvP0yvyTMqlVx2/k3lV5FQRndHPltgXzELUvZ0OQvBfw==
+    dependencies:
+      commander "^2.7.1"
+      gextend "^0.1.6"
+      suspawn "^0.2.2"
+  
   commander@7.2.0:
     version "7.2.0"
     resolved "https://registry.yarnpkg.com/commander/-/commander-7.2.0.tgz#a36cb57d0b501ce108e4d20559a150a391d97ab7"
     integrity sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==
+  
+  commander@^2.7.1:
+    version "2.20.3"
+    resolved "https://registry.yarnpkg.com/commander/-/commander-2.20.3.tgz#fd485e84c03eb4881c20722ba48035e8531aeb33"
+    integrity sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==
   
   core-js@^3.6.5:
     version "3.21.0"
@@ -151,6 +175,11 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/diff/-/diff-4.0.2.tgz#60f3aecb89d5fae520c11aa19efc2bb982aade7d"
     integrity sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==
   
+  gextend@^0.1.6:
+    version "0.1.6"
+    resolved "https://registry.yarnpkg.com/gextend/-/gextend-0.1.6.tgz#ede42c0f0bbf53fd0f5f101c416343caf6bd8472"
+    integrity sha1-7eQsDwu/U/0PXxAcQWNDyva9hHI=
+  
   globalyzer@0.1.0:
     version "0.1.0"
     resolved "https://registry.yarnpkg.com/globalyzer/-/globalyzer-0.1.0.tgz#cb76da79555669a1519d5a8edf093afaa0bf1465"
@@ -166,10 +195,17 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/make-error/-/make-error-1.3.6.tgz#2eb2e37ea9b67c4891f684a1394799af484cf7a2"
     integrity sha512-s8UhlNe7vPKomQhC1qFelMokr/Sc3AgNbso3n74mVPA5LTZwkB9NlXf4XPamLxJE8h0gh73rM94xvwRT2CVInw==
   
-  node-watch@0.7.2:
-    version "0.7.2"
-    resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.7.2.tgz#545f057da8500487eb8287adcb4cb5a7338d7e21"
-    integrity sha512-g53VjSARRv1JdST0LZRIg8RiuLr1TaBbVPsVvxh0/0Ymvi0xYUjDuoqQQAWtHJQUXhiShowPT/aXKNeHBcyQsw==
+  network-utils@^0.0.0:
+    version "0.0.0"
+    resolved "https://registry.yarnpkg.com/network-utils/-/network-utils-0.0.0.tgz#7fc2ac6a317c79bd2edd10fa50b8a2b743bb4fe6"
+    integrity sha1-f8KsajF8eb0u3RD6ULiit0O7T+Y=
+    dependencies:
+      rxjs "^5.3.0"
+  
+  node-watch@0.7.3:
+    version "0.7.3"
+    resolved "https://registry.yarnpkg.com/node-watch/-/node-watch-0.7.3.tgz#6d4db88e39c8d09d3ea61d6568d80e5975abc7ab"
+    integrity sha512-3l4E8uMPY1HdMMryPRUAl+oIHtXtyiTlIiESNSVSNxcPfzAFzeTbXFQkZfAwBbo0B1qMSG8nUABx+Gd+YrbKrQ==
   
   promise-duplex@^6.0.0:
     version "6.0.0"
@@ -200,14 +236,36 @@ Lockfile:
     resolved "https://registry.yarnpkg.com/promise-writable/-/promise-writable-6.0.0.tgz#4d703e75873a4e755a39bdb926a37f41538e507f"
     integrity sha512-b81zre/itgJFS7dwWzIdKNVVqvLiUxYRS/wolUB0H1YY/tAaS146XGKa4Q/5wCbsnXLyn0MCeV6f8HHe4iUHLg==
   
+  queue-promise@^2.2.1:
+    version "2.2.1"
+    resolved "https://registry.yarnpkg.com/queue-promise/-/queue-promise-2.2.1.tgz#8de03fb79ba458efcb5ebf76368ab029d2669752"
+    integrity sha512-C3eyRwLF9m6dPV4MtqMVFX+Xmc7keZ9Ievm3jJ/wWM5t3uVbFnGsJXwpYzZ4LaIEcX9bss/mdaKzyrO6xheRuA==
+  
   qunit@^2.17.2:
-    version "2.17.2"
-    resolved "https://registry.yarnpkg.com/qunit/-/qunit-2.17.2.tgz#5cb278e131d931f25c109a0fdb0518be7754c25a"
-    integrity sha512-17isVvuOmALzsPjiV7wFg/6O5vJYXBrQZPwocfQSSh0I/rXvfX7bKMFJ4GMVW3U4P8r2mBeUy8EAngti4QD2Vw==
+    version "2.18.0"
+    resolved "https://registry.yarnpkg.com/qunit/-/qunit-2.18.0.tgz#5a3efc8ee609e9d8f207a1ad317a9b02bb14bc6b"
+    integrity sha512-Xw/zUm5t1JY8SNErki/qtw4fCuaaOZL+bPloZU+0kto+fO8j1JV9MQWqXO4kATfhEyJohlsKZpfg1HF7GOkpXw==
     dependencies:
       commander "7.2.0"
-      node-watch "0.7.2"
+      node-watch "0.7.3"
       tiny-glob "0.2.9"
+  
+  rxjs@^5.3.0:
+    version "5.5.12"
+    resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-5.5.12.tgz#6fa61b8a77c3d793dbaf270bee2f43f652d741cc"
+    integrity sha512-xx2itnL5sBbqeeiVgNPVuQQ1nC8Jp2WfNJhXWHmElW9YmrpS9UVnNzhP3EH3HFqexO5Tlp8GhYY+WEcqcVMvGw==
+    dependencies:
+      symbol-observable "1.0.1"
+  
+  suspawn@^0.2.2:
+    version "0.2.2"
+    resolved "https://registry.yarnpkg.com/suspawn/-/suspawn-0.2.2.tgz#0a540fda0817579e8905b56e29de1bf483a5f3c3"
+    integrity sha1-ClQP2ggXV56JBbVuKd4b9IOl88M=
+  
+  symbol-observable@1.0.1:
+    version "1.0.1"
+    resolved "https://registry.yarnpkg.com/symbol-observable/-/symbol-observable-1.0.1.tgz#8340fc4702c3122df5d22288f88283f513d3fdd4"
+    integrity sha1-g0D8RwLDEi310iKI+IKD9RPT/dQ=
   
   tiny-glob@0.2.9:
     version "0.2.9"
@@ -218,9 +276,9 @@ Lockfile:
       globrex "^0.1.2"
   
   ts-node@^10.4.0:
-    version "10.4.0"
-    resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.4.0.tgz#680f88945885f4e6cf450e7f0d6223dd404895f7"
-    integrity sha512-g0FlPvvCXSIO1JDF6S232P5jPYqBkRL9qly81ZgAOSU7rwI0stphCgd2kLiCrU9DjQCrJMWEqcNSjQL02s6d8A==
+    version "10.5.0"
+    resolved "https://registry.yarnpkg.com/ts-node/-/ts-node-10.5.0.tgz#618bef5854c1fbbedf5e31465cbb224a1d524ef9"
+    integrity sha512-6kEJKwVxAJ35W4akuiysfKwKmjkbYxwQMTBaAxo9KKAx/Yd26mPUyhGz3ji+EsJoAgrLqVsYHNuuYwQe22lbtw==
     dependencies:
       "@cspotcode/source-map-support" "0.7.0"
       "@tsconfig/node10" "^1.0.7"
@@ -233,6 +291,7 @@ Lockfile:
       create-require "^1.1.0"
       diff "^4.0.1"
       make-error "^1.1.1"
+      v8-compile-cache-lib "^3.0.0"
       yn "3.1.1"
   
   tslib@^2.0.1:
@@ -244,6 +303,11 @@ Lockfile:
     version "4.5.5"
     resolved "https://registry.yarnpkg.com/typescript/-/typescript-4.5.5.tgz#d8c953832d28924a9e3d37c73d729c846c5896f3"
     integrity sha512-TCTIul70LyWe6IJWT8QSYeA54WQe8EjQFU4wY52Fasj5UKx88LNYKCgBEHcOMOrFF1rKGbD8v/xcNWVUq9SymA==
+  
+  v8-compile-cache-lib@^3.0.0:
+    version "3.0.0"
+    resolved "https://registry.yarnpkg.com/v8-compile-cache-lib/-/v8-compile-cache-lib-3.0.0.tgz#0582bcb1c74f3a2ee46487ceecf372e46bce53e8"
+    integrity sha512-mpSYqfsFvASnSn5qMiwrr4VKfumbPyONLCOPmsR3A6pTY/r0+tSaVbgPWSAIuzbk3lCTa+FForeTiO+wBQGkjA==
   
   yn@3.1.1:
     version "3.1.1"

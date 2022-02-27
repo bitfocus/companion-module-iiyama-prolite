@@ -1,0 +1,1 @@
+export function getMAC(ip: string, cb: (err: any, mac: string) => void): void;

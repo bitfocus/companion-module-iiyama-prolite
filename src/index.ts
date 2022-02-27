@@ -1,4 +1,5 @@
 import { CompanionActions, CompanionFeedbackEvent, SomeCompanionConfigField } from "../../../instance_skel_types";
+import arp from 'node-arp';
 import InstanceSkel from '../../../instance_skel';
 import sleep from './sleep';
 import ProliteApi from "./prolite-api/prolite";
@@ -7,6 +8,7 @@ import { ProliteVideoSource, ProlitePowerState } from "./prolite-api/ProliteApiT
 
 interface IiyamaProliteConfig {
   host: string;
+  mac: string;
   port: number;
   protocol: ProliteProtocol;
   monitorId: number;
@@ -68,6 +70,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
   private activeInput?: ProliteVideoSource;
   private powerState?: ProlitePowerState;
 
+  private REGEX_MAC: string = '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$';
   /**
    * Provide a simple return 
    * of the necessary fields for the 
@@ -82,6 +85,20 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         label: 'IP Address',
         width: 6,
         regex: this.REGEX_IP
+      },
+      {
+        type: 'text',
+        id: 'info',
+        width: 12,
+        label: 'MAC Address',
+        value: 'MAC Address will be auto populated from the IP address when you save the config, if the screen is online'
+      },
+      {
+        type: 'textinput',
+        id: 'mac',
+        label: 'MAC Address',
+        width: 8,
+        regex: this.REGEX_MAC
       },
       {
         type: 'dropdown',
@@ -165,11 +182,11 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         // check the status via the api
         try {
           let activeInput = await this._api.getInput();
-          console.log(activeInput);
+//          console.log(activeInput);
           this.status(this.STATUS_OK);
           if (activeInput !== this.activeInput) {
             // status changed
-            console.log('activeInput changed');
+//            console.log('activeInput changed');
             this.activeInput = activeInput;
             this.checkFeedbacks('activeInput');
           }
@@ -223,12 +240,38 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
    * @return {void}
    */
   updateConfig(config: IiyamaProliteConfig): void {
+//    console.log('updateConfig', config);
     this.config = config;
+    if (!config.mac) {
+      this.setMacAddressFromNetwork();
+    }
     if (this._api) {
       this._api.destroy();
     }
 
     this._api = new ProliteApi(config.host, config.protocol);
+  }
+
+  getMac(ip: string): Promise<string> {
+    return new Promise<string>((resolve, reject) => {
+      arp.getMAC(ip, function (err, macAddress) {
+        if (err) {
+          reject(err);
+        } else {
+          resolve(macAddress);
+        }
+      });
+    });
+  }
+
+  async setMacAddressFromNetwork(): Promise<void> {
+    // Retrieve the corresponding MAC address for a given IP address
+    try {
+      this.config.mac = await this.getMac(this.config.host);
+      this.saveConfig();
+    } catch {
+      // ignore error - device is offline
+    }
   }
 
   setupFeedback() {

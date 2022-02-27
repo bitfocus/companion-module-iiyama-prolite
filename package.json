@@ -15,13 +15,13 @@
   "author": "Bryan Crotaz <bgcrotaz@hotmail.com>",
   "license": "MIT",
   "homepage": "https://github.com/bitfocus/companion-module-iiyama-prolite#readme",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-iiyama-prolite/issues"
-	},
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-iiyama-prolite.git"
-	},
+  "bugs": {
+    "url": "https://github.com/bitfocus/companion-module-iiyama-prolite/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitfocus/companion-module-iiyama-prolite.git"
+  },
   "private": false,
   "scripts": {
     "dev": "yarn build:watch",
@@ -33,6 +33,8 @@
     "test": "qunit --require ts-node/register 'test/**/*-test.ts'"
   },
   "dependencies": {
+    "arpscan": "^1.0.2",
+    "node-arp": "^1.0.6",
     "promise-socket": "^7.0.0",
     "queue-promise": "^2.2.1"
   },
