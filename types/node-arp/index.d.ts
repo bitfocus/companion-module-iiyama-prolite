@@ -1,1 +1,3 @@
-export function getMAC(ip: string, cb: (err: any, mac: string) => void): void;
+type GetMacCallback = (err: any, mac: string) => void;
+
+export function getMAC(ip: string, cb: GetMacCallback): void;

@@ -132,7 +132,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
       if (this._api) {
         this._api.destroy();
       }
-      this._api = new ProliteApi(config.host, config.protocol);
+      this._api = new ProliteApi(config.host, config.mac, config.protocol);
       this.subscribeFeedbacks();
       this.checkStatus();
     }
@@ -162,7 +162,6 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         this.status(this.STATUS_OK);
       }
       catch (e: any) {
-        console.log(e)
         this.status(this.STATUS_ERROR, e.message);
       }
       await sleep(2000);
@@ -249,7 +248,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
       this._api.destroy();
     }
 
-    this._api = new ProliteApi(config.host, config.protocol);
+    this._api = new ProliteApi(config.host, config.mac, config.protocol);
   }
 
   getMac(ip: string): Promise<string> {
@@ -435,9 +434,20 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         ],
         callback: async ({ options }: { options: any }) =>
           await this._api?.setMute(options.mute)
+      },
+      wakeOnLan: {
+        label: 'Wake On LAN',
+        options: [],
+        callback: async () =>
+          await this.wakeOnLan()
       }
     }
   }
+
+  wakeOnLan(): void {
+    this._api?.wakeOnLan();
+  }
+
 }
 
 exports = module.exports = instance;

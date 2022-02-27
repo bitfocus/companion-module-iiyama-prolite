@@ -1,3 +1,4 @@
+import wakeOnLan from 'wake_on_lan';
 import { ProliteApiCommand, ProliteAspectRatio, ProliteColorTemp, ProliteOnOff, ProlitePictureMode, ProlitePowerState, ProliteRemoteControl, ProliteSoundMode, ProliteVideoSource } from "./ProliteApiTypes";
 import { ProliteProtocol } from "./protocol";
 import ProliteLH42UHSApi from "./protocols/LH42UHS";
@@ -10,9 +11,10 @@ export interface ProliteApiImplementation {
 }
 
 export default class ProliteApi {
-  _implementation: ProliteApiImplementation;
+  private _implementation: ProliteApiImplementation;
+  private _mac: string;
 
-  constructor (host: string, protocol: ProliteProtocol) {
+  constructor (host: string, mac: string, protocol: ProliteProtocol) {
     switch(protocol) {
       case ProliteProtocol.LH42UHS: 
         this._implementation = new ProliteLH42UHSApi(host, 1);
@@ -23,10 +25,21 @@ export default class ProliteApi {
       default:
         throw ('Unknown protocol: '+protocol)
     }
+    this._mac = mac;
   }
 
   public destroy() {
     this._implementation.destroy();
+  }
+
+  wakeOnLan(): void {
+    if (this._mac) {
+      console.log('waking up', this._mac);
+      wakeOnLan.wake(this._mac, { 
+        address: "255.255.255.255", 
+        num_packets: 5
+      });
+    }
   }
 
   public async getPowerState(): Promise<ProlitePowerState> {

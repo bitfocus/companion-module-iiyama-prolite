@@ -36,7 +36,8 @@
     "arpscan": "^1.0.2",
     "node-arp": "^1.0.6",
     "promise-socket": "^7.0.0",
-    "queue-promise": "^2.2.1"
+    "queue-promise": "^2.2.1",
+    "wake_on_lan": "^1.0.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.14",
