@@ -1,6 +1,6 @@
-import { CompanionActions, CompanionFeedbackEvent, SomeCompanionConfigField } from "../../../instance_skel_types";
 import arp from 'node-arp';
-import InstanceSkel from '../../../instance_skel';
+import { CompanionActions, CompanionFeedbackEvent, SomeCompanionConfigField } from "../types/instance_skel_types";
+import InstanceSkel from '../types/instance_skel';
 import sleep from './sleep';
 import ProliteApi from "./prolite-api/prolite";
 import { ProliteProtocol } from "./prolite-api/protocol";
