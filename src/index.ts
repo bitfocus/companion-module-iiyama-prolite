@@ -267,7 +267,8 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         var newMac = await this.getMac(this.config.host);
         if (newMac === '(incomplete)') {
           // router doesn't know the MAC address
-          newMac = '00:00:00:00:00:00';
+          // so don't change the value
+          return;
         }
         if (newMac !== this.config.mac) {
           this.config.mac = newMac;
