@@ -91,7 +91,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         id: 'info',
         width: 12,
         label: 'MAC Address',
-        value: 'The screen must be connected when you save the config so that the MAC Address will be auto populated from the IP address. If the MAC address is shown as 00:00:00:00:00:00 that means the screen isn\'t being seen by the router ARP table.'
+        value: 'The screen must be connected when you save the config so that the MAC Address will be auto populated from the IP address. If the MAC address does not change that means the screen isn\'t being seen by the router ARP table. It might be powered off or not connected to the same network segment as you.'
       },
       {
         type: 'textinput',
