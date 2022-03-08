@@ -1,6 +1,6 @@
 import arp from 'node-arp';
 import { CompanionActions, CompanionFeedbackEvent, SomeCompanionConfigField } from "../types/instance_skel_types";
-import InstanceSkel from '../types/instance_skel';
+import InstanceSkel from '../../../instance_skel';
 import sleep from './sleep';
 import ProliteApi from "./prolite-api/prolite";
 import { ProliteProtocol } from "./prolite-api/protocol";
@@ -91,7 +91,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         id: 'info',
         width: 12,
         label: 'MAC Address',
-        value: 'MAC Address will be auto populated from the IP address when you save the config, if the screen is online'
+        value: 'MAC Address will be auto populated from the IP address when you save the config, if the screen is online. If the MAC address is shown as 00:00:00:00:00:00 that means the screen isn\'t being seen by the router ARP table.'
       },
       {
         type: 'textinput',
@@ -238,16 +238,13 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
    * @param {BarcoClickShareConfig} config
    * @return {void}
    */
-  updateConfig(config: IiyamaProliteConfig): void {
+  async updateConfig(config: IiyamaProliteConfig): Promise<void> {
 //    console.log('updateConfig', config);
     this.config = config;
-    if (!config.mac) {
-      this.setMacAddressFromNetwork();
-    }
     if (this._api) {
       this._api.destroy();
     }
-
+    await this.setMacAddressFromNetwork();
     this._api = new ProliteApi(config.host, config.mac, config.protocol);
   }
 
@@ -266,9 +263,19 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
   async setMacAddressFromNetwork(): Promise<void> {
     // Retrieve the corresponding MAC address for a given IP address
     try {
-      this.config.mac = await this.getMac(this.config.host);
-      this.saveConfig();
-    } catch {
+      if (this.config.host) {
+        var newMac = await this.getMac(this.config.host);
+        if (newMac === '(incomplete)') {
+          // router doesn't know the MAC address
+          newMac = '00:00:00:00:00:00';
+        }
+        if (newMac !== this.config.mac) {
+          this.config.mac = newMac;
+          this.saveConfig();
+        }
+      }
+    } catch (e) {
+      console.log(e);
       // ignore error - device is offline
     }
   }
@@ -439,13 +446,9 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         label: 'Wake On LAN',
         options: [],
         callback: async () =>
-          await this.wakeOnLan()
+          await this._api?.wakeOnLan()
       }
     }
-  }
-
-  wakeOnLan(): void {
-    this._api?.wakeOnLan();
   }
 
 }
