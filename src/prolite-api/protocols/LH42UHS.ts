@@ -105,7 +105,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
   
   private async write(buffer: Buffer) {
     try {
-      // console.log('Prolite Sending', buffer.toString('hex'));  
+//      console.log('Prolite Sending', buffer.toString('hex'));  
       var client = await this.connect();
       await client.write(buffer);
     } catch (e: any) {
@@ -134,7 +134,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
         throw new ProliteChecksumError();
       }      
       var message = Buffer.concat([header, body]);
-      // console.log('received ', message.toString('hex'));  
+//      console.log('received ', message.toString('hex'));  
       return message;
     } catch (e: any) {
       this.killClient();
@@ -167,7 +167,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
   }
 
   private decodeReply(reply: Buffer): Buffer {
-    var length = reply[5] - 3;
+    var length = reply[4] - 3;
     return reply.slice(7, 7+length);
   }
 
@@ -272,6 +272,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
     }
     await this.write(message);
     var reply = await this.readReply();
+//    console.log('reply ', reply.toString('hex'));  
     switch(cmd) {
       case ProliteApiCommand.Power: {
         if (reply[0] == 0x01) {
@@ -285,7 +286,8 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
         if (source !== undefined) {
           return source;
         }
-        throw new ProliteUnknownResponseError;
+//        console.log('unknown source', reply.toString('hex'));
+        return 'unknown';
       }
     }
   }

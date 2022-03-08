@@ -162,6 +162,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         this.status(this.STATUS_OK);
       }
       catch (e: any) {
+        console.log(e)
         this.status(this.STATUS_ERROR, e.message);
       }
       await sleep(2000);
