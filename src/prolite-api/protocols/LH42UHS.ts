@@ -108,7 +108,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
 //      console.log('Prolite Sending', buffer.toString('hex'));  
       var client = await this.connect();
       await client.write(buffer);
-    } catch (e: any) {
+    } catch (e) {
       this.killClient();
       throw e;
     }
@@ -136,7 +136,7 @@ export default class ProliteLH42UHSApi implements ProliteApiImplementation {
       var message = Buffer.concat([header, body]);
 //      console.log('received ', message.toString('hex'));  
       return message;
-    } catch (e: any) {
+    } catch (e) {
       this.killClient();
       throw e;
     }

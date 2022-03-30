@@ -67,7 +67,7 @@ export default class ProliteTE04Api implements ProliteApiImplementation {
 //      console.log('Prolite Sending', buffer.toString('hex'));  
       var client = await this.connect();
       await client.write(buffer);
-    } catch (e: any) {
+    } catch (e) {
       this.killClient();
       throw e;
     }
@@ -92,7 +92,7 @@ export default class ProliteTE04Api implements ProliteApiImplementation {
       } while (char !== EOL);
 //      console.log('Prolite Received ', Buffer.from(message).toString('hex'));  
       return message;
-    } catch (e: any) {
+    } catch (e) {
       this.killClient();
       throw e;
     }

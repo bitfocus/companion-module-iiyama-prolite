@@ -136,7 +136,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
       this.subscribeFeedbacks();
       this.checkStatus();
     }
-    catch (e: any) {
+    catch (e) {
       console.log('prolite/error ' + e.message)
     }
   }
@@ -161,7 +161,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
         await this._api.getInput();
         this.status(this.STATUS_OK);
       }
-      catch (e: any) {
+      catch (e) {
         console.log(e)
         this.status(this.STATUS_ERROR, e.message);
       }
@@ -191,7 +191,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
             this.checkFeedbacks('activeInput');
           }
         }
-        catch (e: any) {
+        catch (e) {
           this.status(this.STATUS_ERROR, e.message);
         }
         await sleep(750);
@@ -222,7 +222,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
             this.checkFeedbacks('powerState');
           }
         }
-        catch (e: any) {
+        catch (e) {
           this.status(this.STATUS_ERROR, e.message);
         }
         await sleep(750);
