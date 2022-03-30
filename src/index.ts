@@ -137,7 +137,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
       this.checkStatus();
     }
     catch (e) {
-      console.log('prolite/error ' + e.message)
+      console.log('prolite/error ', e)
     }
   }
 
@@ -163,7 +163,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
       }
       catch (e) {
         console.log(e)
-        this.status(this.STATUS_ERROR, e.message);
+        this.status(this.STATUS_ERROR, (e as any).message);
       }
       await sleep(2000);
     }
@@ -192,7 +192,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
           }
         }
         catch (e) {
-          this.status(this.STATUS_ERROR, e.message);
+          this.status(this.STATUS_ERROR, (e as any).message);
         }
         await sleep(750);
       }
@@ -223,7 +223,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
           }
         }
         catch (e) {
-          this.status(this.STATUS_ERROR, e.message);
+          this.status(this.STATUS_ERROR, (e as any).message);
         }
         await sleep(750);
       }

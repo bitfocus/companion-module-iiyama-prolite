@@ -38,4 +38,5 @@ jobs:
       run: |
         export PATH=$PATH:node_modules/.bin
         tsc
+        yarn build
         yarn test
