@@ -37,4 +37,5 @@ jobs:
     - name: test
       run: |
         export PATH=$PATH:node_modules/.bin
+        tsc
         yarn test
