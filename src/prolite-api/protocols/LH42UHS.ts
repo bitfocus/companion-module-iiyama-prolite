@@ -3,7 +3,7 @@ import net from 'net';
 import { PromiseSocket } from 'promise-socket';
 import { ProliteApiImplementation } from "../prolite";
 import { ProliteApiCommand, ProlitePowerState, ProliteVideoSource } from "../ProliteApiTypes";
-import { ProliteChecksumError, ProliteUnknownResponseError, ProliteUnsupportedCommandError } from "./errors";
+import { ProliteChecksumError, ProliteUnsupportedCommandError } from "./errors";
 import Queue from "queue-promise";
 
 /*
