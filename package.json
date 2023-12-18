@@ -28,22 +28,19 @@
     "build": "npx rimraf dist && npx -p typescript tsc -p tsconfig.build.json",
     "build:main": "tsc -p tsconfig.build.json",
     "build:watch": "tsc -p tsconfig.build.json --watch",
-    "lint": "eslint . --ext .ts",
-    "postinstall": "yarn build",
-    "test": "qunit --require ts-node/register 'test/**/*-test.ts'"
+    "lint": "eslint . --ext .ts"
   },
   "dependencies": {
-    "arpscan": "^1.0.2",
+    "@companion-module/base": "~1.6.0",
     "node-arp": "^1.0.6",
     "promise-socket": "^7.0.0",
     "queue-promise": "^2.2.1",
     "wake_on_lan": "^1.0.0"
   },
   "devDependencies": {
-    "@types/node": "^17.0.14",
-    "@types/qunit": "^2.11.3",
-    "qunit": "^2.17.2",
-    "ts-node": "^10.4.0",
-    "typescript": "^4.5.5"
+    "@companion-module/tools": "^1.4.1",
+    "@types/node": "^18.19.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.3.3"
   }
 }
