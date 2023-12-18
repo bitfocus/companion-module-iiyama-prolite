@@ -15,6 +15,7 @@
     "build:watch": "tsc -p tsconfig.build.json --watch",
     "lint": "eslint . --ext .ts"
   },
+  "prettier": "@companion-module/tools/.prettierrc.json",
   "dependencies": {
     "@companion-module/base": "~1.6.0",
     "node-arp": "^1.0.6",

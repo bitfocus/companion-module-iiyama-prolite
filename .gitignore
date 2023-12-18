@@ -4,3 +4,4 @@ dist/
 /pkg
 /pkg.tgz
 /DEBUG-*
+*.log

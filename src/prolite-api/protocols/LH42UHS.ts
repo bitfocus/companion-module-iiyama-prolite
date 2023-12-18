@@ -1,10 +1,10 @@
-import { TClient } from "../client";
-import net from 'net';
-import { PromiseSocket } from 'promise-socket';
-import { ProliteApiImplementation } from "../prolite";
-import { ProliteApiCommand, ProlitePowerState, ProliteVideoSource } from "../ProliteApiTypes";
-import { ProliteChecksumError, ProliteUnsupportedCommandError } from "./errors";
-import Queue from "queue-promise";
+import { TClient } from '../client'
+import net from 'net'
+import { PromiseSocket } from 'promise-socket'
+import { ProliteApiImplementation } from '../prolite'
+import { ProliteApiCommand, ProlitePowerState, ProliteVideoSource } from '../ProliteApiTypes'
+import { ProliteChecksumError, ProliteUnsupportedCommandError } from './errors'
+import Queue from 'queue-promise'
 
 /*
 Byte 1 Header Header = 0xA6
@@ -40,256 +40,250 @@ DATA[0] … XOR DATA[N]
 */
 
 const videoSourceMap = new Map<ProliteVideoSource, number>([
-  [ ProliteVideoSource.Component, 0x03 ],
-  [ ProliteVideoSource.Composite, 0x01 ],
-  [ ProliteVideoSource.DisplayPort, 0x0A ],
-  [ ProliteVideoSource.SlotInPC, 0x0B ],
-  [ ProliteVideoSource.HDMI1, 0x0D ],
-  [ ProliteVideoSource.HDMI2, 0x06 ],
-  [ ProliteVideoSource.HDMI3, 0x0F ],
-  [ ProliteVideoSource.HDMI4, 0x19 ],
-  [ ProliteVideoSource.VGA, 0x05 ],
-  [ ProliteVideoSource.DVI, 0x09 ]
+	[ProliteVideoSource.Component, 0x03],
+	[ProliteVideoSource.Composite, 0x01],
+	[ProliteVideoSource.DisplayPort, 0x0a],
+	[ProliteVideoSource.SlotInPC, 0x0b],
+	[ProliteVideoSource.HDMI1, 0x0d],
+	[ProliteVideoSource.HDMI2, 0x06],
+	[ProliteVideoSource.HDMI3, 0x0f],
+	[ProliteVideoSource.HDMI4, 0x19],
+	[ProliteVideoSource.VGA, 0x05],
+	[ProliteVideoSource.DVI, 0x09],
 ])
 
-const reverseVideoSourceMap = new Map<number, ProliteVideoSource>();
+const reverseVideoSourceMap = new Map<number, ProliteVideoSource>()
 
-const ProliteLH42UHSPort = 5000;
+const ProliteLH42UHSPort = 5000
 export default class ProliteLH42UHSApi implements ProliteApiImplementation {
-  private _host: string;
-  private _client?: TClient;
-  private _monitorId: number;
+	private _host: string
+	private _client?: TClient
+	private _monitorId: number
 
-  private queue = new Queue({
-    concurrent: 1,
-    interval: 1
-  });
+	private queue = new Queue({
+		concurrent: 1,
+		interval: 1,
+	})
 
-  constructor(host: string, monitorId: number) {
-    this._host = host;
-    this._monitorId = monitorId;
-    if (reverseVideoSourceMap.size == 0) {
-      for (var entry of videoSourceMap) {
-        reverseVideoSourceMap.set(entry[1], entry[0]);
-      }
-    }
-  }
+	constructor(host: string, monitorId: number) {
+		this._host = host
+		this._monitorId = monitorId
+		if (reverseVideoSourceMap.size == 0) {
+			for (var entry of videoSourceMap) {
+				reverseVideoSourceMap.set(entry[1], entry[0])
+			}
+		}
+	}
 
-  public destroy() {
-    this.killClient();
-  }
+	public destroy() {
+		this.killClient()
+	}
 
-  private killClient() {
-    if (this._client) {
-      this._client.socket.removeAllListeners();
-      this._client.destroy();
-      this._client = undefined;
-    }
-  }
+	private killClient() {
+		if (this._client) {
+			this._client.socket.removeAllListeners()
+			this._client.destroy()
+			this._client = undefined
+		}
+	}
 
-  async connect(): Promise<TClient> {
-    if (this._client) {
-      return this._client;
-    }
-    let socket = new net.Socket();
-    let client = new PromiseSocket(socket);
-    client.setTimeout(1500);
-    client.socket.setMaxListeners(16);
-    client.socket.addListener('close', () => {
-      this.killClient();
-    });
-    await client.connect(ProliteLH42UHSPort, this._host);
-    this._client = client;
-    return this._client;
-  }
-  
-  private async write(buffer: Buffer) {
-    try {
-//      console.log('Prolite Sending', buffer.toString('hex'));  
-      var client = await this.connect();
-      await client.write(buffer);
-    } catch (e) {
-      this.killClient();
-      throw e;
-    }
-  }
+	async connect(): Promise<TClient> {
+		if (this._client) {
+			return this._client
+		}
+		let socket = new net.Socket()
+		let client = new PromiseSocket(socket)
+		client.setTimeout(1500)
+		client.socket.setMaxListeners(16)
+		client.socket.addListener('close', () => {
+			this.killClient()
+		})
+		await client.connect(ProliteLH42UHSPort, this._host)
+		this._client = client
+		return this._client
+	}
 
-  private async AckNack() {
-    var reply = await this.readReply();
-    this.checkReply(reply); // throws if a nack
-  }
+	private async write(buffer: Buffer) {
+		try {
+			//      console.log('Prolite Sending', buffer.toString('hex'));
+			var client = await this.connect()
+			await client.write(buffer)
+		} catch (e) {
+			this.killClient()
+			throw e
+		}
+	}
 
-  /**
-   * Read from socket until EOL
-   * @return {Promise<string>}
-   */
-  private async read(): Promise<Buffer> {
-    try {
-      var client = await this.connect();
-      // read header
-      var header = await client.read(6) as Buffer;
-      var msgLength = header[4];
-      var body = await client.read(msgLength-1) as Buffer;
-      if (!body) {
-        throw new ProliteChecksumError();
-      }      
-      var message = Buffer.concat([header, body]);
-//      console.log('received ', message.toString('hex'));  
-      return message;
-    } catch (e) {
-      this.killClient();
-      throw e;
-    }
-  }
+	private async AckNack() {
+		var reply = await this.readReply()
+		this.checkReply(reply) // throws if a nack
+	}
 
-  private makeMessage(code: number, data: number[] = []): Buffer {
-    var header = new Uint8Array(7);
-    header [0] = 0xa6;
-    header [1] = this._monitorId;
-    header [2] = 0;
-    header [3] = 0;
-    header [4] = 0;
-    header [5] = 3 + data.length;
-    header [6] = 0x01;
+	/**
+	 * Read from socket until EOL
+	 * @return {Promise<string>}
+	 */
+	private async read(): Promise<Buffer> {
+		try {
+			var client = await this.connect()
+			// read header
+			var header = (await client.read(6)) as Buffer
+			var msgLength = header[4]
+			var body = (await client.read(msgLength - 1)) as Buffer
+			if (!body) {
+				throw new ProliteChecksumError()
+			}
+			var message = Buffer.concat([header, body])
+			//      console.log('received ', message.toString('hex'));
+			return message
+		} catch (e) {
+			this.killClient()
+			throw e
+		}
+	}
 
-    data.unshift(code);
+	private makeMessage(code: number, data: number[] = []): Buffer {
+		var header = new Uint8Array(7)
+		header[0] = 0xa6
+		header[1] = this._monitorId
+		header[2] = 0
+		header[3] = 0
+		header[4] = 0
+		header[5] = 3 + data.length
+		header[6] = 0x01
 
-    var checksum = 0;
-    for (var i=0; i < 7; i++) {
-      checksum ^= header[i];
-    }
-    for (var i=0; i < data.length; i++) {
-      checksum ^= data[i];
-    }
-    var dataArray = new Uint8Array(data);
-    var checksumArray = new Uint8Array([checksum]);
-    return Buffer.concat([header, dataArray, checksumArray]);
-  }
+		data.unshift(code)
 
-  private decodeReply(reply: Buffer): Buffer {
-    var length = reply[4] - 3;
-    return reply.slice(7, 7+length);
-  }
+		var checksum = 0
+		for (var i = 0; i < 7; i++) {
+			checksum ^= header[i]
+		}
+		for (var i = 0; i < data.length; i++) {
+			checksum ^= data[i]
+		}
+		var dataArray = new Uint8Array(data)
+		var checksumArray = new Uint8Array([checksum])
+		return Buffer.concat([header, dataArray, checksumArray])
+	}
 
-  private async readReply(): Promise<Buffer> {
-    var reply = await this.read();
-    this.checkReply(reply); // throws if there's an error
-    return this.decodeReply(reply);
-  }
+	private decodeReply(reply: Buffer): Buffer {
+		var length = reply[4] - 3
+		return reply.slice(7, 7 + length)
+	}
 
-  private checkReply(reply: Buffer) {
-    if (reply[0] !== 0x21) {
-      throw ('header is wrong');
-    }
-    if (reply.length < 8) {
-      throw new ProliteChecksumError();
-    }
-    var msgChecksum = reply[reply.length-1];
-    var calcChecksum = 0;
-    for (var i=0; i< reply.length-1; i++) {
-      calcChecksum ^= reply[i];
-    }
-    if (msgChecksum !== calcChecksum) {
-      throw new ProliteChecksumError();
-    }
-  }
+	private async readReply(): Promise<Buffer> {
+		var reply = await this.read()
+		this.checkReply(reply) // throws if there's an error
+		return this.decodeReply(reply)
+	}
 
-  public async set(cmd: ProliteApiCommand, value: string | number) {
-    await new Promise<void>((resolve, reject) => {
-      this.queue.enqueue(async () => {
-        try {
-          await this.queuedSet(cmd, value);
-          resolve();
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-  }
+	private checkReply(reply: Buffer) {
+		if (reply[0] !== 0x21) {
+			throw 'header is wrong'
+		}
+		if (reply.length < 8) {
+			throw new ProliteChecksumError()
+		}
+		var msgChecksum = reply[reply.length - 1]
+		var calcChecksum = 0
+		for (var i = 0; i < reply.length - 1; i++) {
+			calcChecksum ^= reply[i]
+		}
+		if (msgChecksum !== calcChecksum) {
+			throw new ProliteChecksumError()
+		}
+	}
 
-  public async queuedSet(cmd: ProliteApiCommand, value: string | number) {
-    var message = null;
-    switch(cmd) {
-      case ProliteApiCommand.Power: {
-        switch (value) {
-          case ProlitePowerState.PowerOff:
-            message = this.makeMessage(0x18, [0x01]);
-            break;
-          default:
-            message = this.makeMessage(0x18, [0x02]);
-            break;
-        }
-        break;
-      }
-      case ProliteApiCommand.VideoSource: {
-        var source = videoSourceMap.get(value as ProliteVideoSource);
-        if (source !== undefined) {
-          var data = [
-            source as number,
-            0,
-            0,
-            0
-          ];
-          message = this.makeMessage(0xAC, data);
-        } else {
-          throw new ProliteUnsupportedCommandError();
-        }
-        break;
-      }
-      default:
-        throw new ProliteUnsupportedCommandError()
-    }
-    await this.write(message);
-    await this.AckNack();
-  }
+	public async set(cmd: ProliteApiCommand, value: string | number) {
+		await new Promise<void>((resolve, reject) => {
+			this.queue.enqueue(async () => {
+				try {
+					await this.queuedSet(cmd, value)
+					resolve()
+				} catch (e) {
+					reject(e)
+				}
+			})
+		})
+	}
 
-  public async get(cmd: ProliteApiCommand): Promise<string> {
-    return await new Promise<string>((resolve, reject) => {
-      this.queue.enqueue(async () => {
-        try {
-          var result = await this.queuedGet(cmd);
-          resolve(result);
-        } catch (e) {
-          reject(e);
-        }
-      });
-    });
-  }
+	public async queuedSet(cmd: ProliteApiCommand, value: string | number) {
+		var message = null
+		switch (cmd) {
+			case ProliteApiCommand.Power: {
+				switch (value) {
+					case ProlitePowerState.PowerOff:
+						message = this.makeMessage(0x18, [0x01])
+						break
+					default:
+						message = this.makeMessage(0x18, [0x02])
+						break
+				}
+				break
+			}
+			case ProliteApiCommand.VideoSource: {
+				var source = videoSourceMap.get(value as ProliteVideoSource)
+				if (source !== undefined) {
+					var data = [source as number, 0, 0, 0]
+					message = this.makeMessage(0xac, data)
+				} else {
+					throw new ProliteUnsupportedCommandError()
+				}
+				break
+			}
+			default:
+				throw new ProliteUnsupportedCommandError()
+		}
+		await this.write(message)
+		await this.AckNack()
+	}
 
-  public async queuedGet(cmd: ProliteApiCommand): Promise<string> {
-    var message = null;
-    switch(cmd) {
-      case ProliteApiCommand.Power: {
-        message = this.makeMessage(0x19);
-        break;
-      }
-      case ProliteApiCommand.VideoSource: {
-        message = this.makeMessage(0xAD);
-        break;
-      }
-      default:
-        throw new ProliteUnsupportedCommandError()
-    }
-    await this.write(message);
-    var reply = await this.readReply();
-//    console.log('reply ', reply.toString('hex'));  
-    switch(cmd) {
-      case ProliteApiCommand.Power: {
-        if (reply[0] == 0x01) {
-          return ProlitePowerState.BacklightOff;
-        } else {
-          return ProlitePowerState.BacklightOn;
-        }
-      }
-      case ProliteApiCommand.VideoSource: {
-        var source = reverseVideoSourceMap.get(reply[0]);
-        if (source !== undefined) {
-          return source;
-        }
-//        console.log('unknown source', reply.toString('hex'));
-        return 'unknown';
-      }
-    }
-  }
-} 
+	public async get(cmd: ProliteApiCommand): Promise<string> {
+		return await new Promise<string>((resolve, reject) => {
+			this.queue.enqueue(async () => {
+				try {
+					var result = await this.queuedGet(cmd)
+					resolve(result)
+				} catch (e) {
+					reject(e)
+				}
+			})
+		})
+	}
 
+	public async queuedGet(cmd: ProliteApiCommand): Promise<string> {
+		var message = null
+		switch (cmd) {
+			case ProliteApiCommand.Power: {
+				message = this.makeMessage(0x19)
+				break
+			}
+			case ProliteApiCommand.VideoSource: {
+				message = this.makeMessage(0xad)
+				break
+			}
+			default:
+				throw new ProliteUnsupportedCommandError()
+		}
+		await this.write(message)
+		var reply = await this.readReply()
+		//    console.log('reply ', reply.toString('hex'));
+		switch (cmd) {
+			case ProliteApiCommand.Power: {
+				if (reply[0] == 0x01) {
+					return ProlitePowerState.BacklightOff
+				} else {
+					return ProlitePowerState.BacklightOn
+				}
+			}
+			case ProliteApiCommand.VideoSource: {
+				var source = reverseVideoSourceMap.get(reply[0])
+				if (source !== undefined) {
+					return source
+				}
+				//        console.log('unknown source', reply.toString('hex'));
+				return 'unknown'
+			}
+		}
+	}
+}
