@@ -1,28 +1,21 @@
 import arp from 'node-arp'
-import { CompanionActions, CompanionFeedbackEvent, SomeCompanionConfigField } from '../types/instance_skel_types'
-import InstanceSkel from '../../../instance_skel'
 import sleep from './sleep'
 import ProliteApi from './prolite-api/prolite'
-import { ProliteProtocol } from './prolite-api/protocol'
 import { ProliteVideoSource, ProlitePowerState } from './prolite-api/ProliteApiTypes'
-
-interface IiyamaProliteConfig {
-	host: string
-	mac: string
-	port: number
-	protocol: ProliteProtocol
-	monitorId: number
-}
+import { IiyamaProliteConfig, getConfigFields } from './config'
+import {
+	CompanionActionDefinitions,
+	InstanceBase,
+	InstanceStatus,
+	SomeCompanionConfigField,
+	combineRgb,
+	runEntrypoint,
+} from '@companion-module/base'
 
 ///
-class instance extends InstanceSkel<IiyamaProliteConfig> {
+class ProliteInstance extends InstanceBase<IiyamaProliteConfig> {
+	private config!: IiyamaProliteConfig
 	private _api: ProliteApi | null = null
-
-	constructor(system: any, id: any, config: any) {
-		super(system, id, config)
-		this.setupFeedback()
-		this.setActions(this.actions)
-	}
 
 	private _videoSubscriptions: Set<string> = new Set<string>()
 	private _powerSubscriptions: Set<string> = new Set<string>()
@@ -70,55 +63,14 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 	private activeInput?: ProliteVideoSource
 	private powerState?: ProlitePowerState
 
-	private REGEX_MAC: string = '^([0-9A-Fa-f]{2}[:-]){5}([0-9A-Fa-f]{2})$'
 	/**
 	 * Provide a simple return
 	 * of the necessary fields for the
 	 * instance configuration screen.
 	 * @return {object[]}
 	 */
-	config_fields(): SomeCompanionConfigField[] {
-		return [
-			{
-				type: 'textinput',
-				id: 'host',
-				label: 'IP Address',
-				width: 6,
-				regex: this.REGEX_IP,
-			},
-			{
-				type: 'text',
-				id: 'info',
-				width: 12,
-				label: 'MAC Address (used for Wake on LAN)',
-				value:
-					"The screen must be connected when you save the config so that the MAC Address will be auto populated from the IP address. If the MAC address does not change that means the screen isn't being seen by the router ARP table. It might be powered off or not connected to the same network segment as you.",
-			},
-			{
-				type: 'textinput',
-				id: 'mac',
-				label: 'MAC Address',
-				width: 8,
-				regex: this.REGEX_MAC,
-			},
-			{
-				type: 'dropdown',
-				id: 'protocol',
-				label: 'Protocol',
-				width: 6,
-				choices: [
-					{
-						id: ProliteProtocol.LH42UHS,
-						label: 'LHxx42UHS',
-					},
-					{
-						id: ProliteProtocol.TE04,
-						label: 'TExx04',
-					},
-				],
-				default: ProliteProtocol.LH42UHS,
-			},
-		]
+	getConfigFields(): SomeCompanionConfigField[] {
+		return getConfigFields()
 	}
 
 	/**
@@ -127,13 +79,18 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 	 * the module should establish a connection to the device.
 	 * @return {void}
 	 */
-	init(): void {
+	async init(config: IiyamaProliteConfig): Promise<void> {
+		this.config = config
+
 		try {
-			const config = this.config
 			if (this._api) {
 				this._api.destroy()
 			}
 			this._api = new ProliteApi(config.host, config.mac, config.protocol)
+
+			this.setupFeedback()
+			this.setActionDefinitions(this.actions)
+
 			this.subscribeFeedbacks()
 			this.checkStatus()
 		} catch (e) {
@@ -148,7 +105,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 	 * connections here.
 	 * @return {void}
 	 */
-	destroy(): void {
+	async destroy(): Promise<void> {
 		if (this._api) {
 			this._api.destroy()
 			this._api = null
@@ -159,10 +116,10 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 		while (this._api) {
 			try {
 				await this._api.getInput()
-				this.status(this.STATUS_OK)
+				this.updateStatus(InstanceStatus.Ok)
 			} catch (e) {
 				console.log(e)
-				this.status(this.STATUS_ERROR, (e as any).message)
+				this.updateStatus(InstanceStatus.ConnectionFailure, (e as any).message)
 			}
 			await sleep(2000)
 		}
@@ -182,7 +139,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				try {
 					let activeInput = await this._api.getInput()
 					//          console.log(activeInput);
-					this.status(this.STATUS_OK)
+					this.updateStatus(InstanceStatus.Ok)
 					if (activeInput !== this.activeInput) {
 						// status changed
 						//            console.log('activeInput changed');
@@ -190,7 +147,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 						this.checkFeedbacks('activeInput')
 					}
 				} catch (e) {
-					this.status(this.STATUS_ERROR, (e as any).message)
+					this.updateStatus(InstanceStatus.ConnectionFailure, (e as any).message)
 				}
 				await sleep(750)
 			}
@@ -212,14 +169,14 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				// check the status via the api
 				try {
 					let powerState = await this._api.getPowerState()
-					this.status(this.STATUS_OK)
+					this.updateStatus(InstanceStatus.Ok)
 					if (powerState !== this.powerState) {
 						// status changed
 						this.powerState = powerState
 						this.checkFeedbacks('powerState')
 					}
 				} catch (e) {
-					this.status(this.STATUS_ERROR, (e as any).message)
+					this.updateStatus(InstanceStatus.ConnectionFailure, (e as any).message)
 				}
 				await sleep(750)
 			}
@@ -234,7 +191,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 	 * @param {BarcoClickShareConfig} config
 	 * @return {void}
 	 */
-	async updateConfig(config: IiyamaProliteConfig): Promise<void> {
+	async configUpdated(config: IiyamaProliteConfig): Promise<void> {
 		//    console.log('updateConfig', config);
 		this.config = config
 		if (this._api) {
@@ -268,7 +225,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				}
 				if (newMac !== this.config.mac) {
 					this.config.mac = newMac
-					this.saveConfig()
+					this.saveConfig(this.config)
 				}
 			}
 		} catch (e) {
@@ -281,13 +238,13 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 		this.setFeedbackDefinitions({
 			activeInput: {
 				type: 'boolean', // Feedbacks can either a simple boolean, or can be an 'advanced' style change (until recently, all feedbacks were 'advanced')
-				label: 'Active Input',
+				name: 'Active Input',
 				description: 'Input being displayed on the screen',
-				style: {
+				defaultStyle: {
 					// The default style change for a boolean feedback
 					// The user will be able to customise these values as well as the fields that will be changed
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(255, 0, 0),
+					color: combineRgb(0, 0, 0),
+					bgcolor: combineRgb(255, 0, 0),
 				},
 				// options is how the user can choose the condition the feedback activates for
 				options: [
@@ -317,26 +274,26 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 						default: 'HDMI',
 					},
 				],
-				callback: (feedback: CompanionFeedbackEvent): boolean => {
+				callback: (feedback): boolean => {
 					// This callback will be called whenever companion wants to check if this feedback is 'active' and should affect the button style
 					return this.activeInput == feedback.options['input']?.valueOf()
 				},
-				subscribe: (feedback: CompanionFeedbackEvent) => {
+				subscribe: (feedback) => {
 					this.addVideoSubscription(feedback.id)
 				},
-				unsubscribe: (feedback: CompanionFeedbackEvent) => {
+				unsubscribe: (feedback) => {
 					this.removeVideoSubscription(feedback.id)
 				},
 			},
 			powerState: {
 				type: 'boolean', // Feedbacks can either a simple boolean, or can be an 'advanced' style change (until recently, all feedbacks were 'advanced')
-				label: 'Power State',
+				name: 'Power State',
 				description: 'Power state of the screen',
-				style: {
+				defaultStyle: {
 					// The default style change for a boolean feedback
 					// The user will be able to customise these values as well as the fields that will be changed
-					color: this.rgb(0, 0, 0),
-					bgcolor: this.rgb(255, 0, 0),
+					color: combineRgb(0, 0, 0),
+					bgcolor: combineRgb(255, 0, 0),
 				},
 				// options is how the user can choose the condition the feedback activates for
 				options: [
@@ -359,24 +316,24 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 						default: 'BacklightOn',
 					},
 				],
-				callback: (feedback: CompanionFeedbackEvent): boolean => {
+				callback: (feedback): boolean => {
 					// This callback will be called whenever companion wants to check if this feedback is 'active' and should affect the button style
 					return this.powerState == feedback.options['input']?.valueOf()
 				},
-				subscribe: (feedback: CompanionFeedbackEvent) => {
+				subscribe: (feedback) => {
 					this.addPowerSubscription(feedback.id)
 				},
-				unsubscribe: (feedback: CompanionFeedbackEvent) => {
+				unsubscribe: (feedback) => {
 					this.removePowerSubscription(feedback.id)
 				},
 			},
 		})
 	}
 
-	get actions(): CompanionActions {
+	get actions(): CompanionActionDefinitions {
 		return {
 			changeInput: {
-				label: 'Change Input',
+				name: 'Change Input',
 				options: [
 					{
 						id: 'input',
@@ -407,7 +364,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				callback: async ({ options }: { options: any }) => await this._api?.setInput(options.input),
 			},
 			power: {
-				label: 'Set Power State',
+				name: 'Set Power State',
 				options: [
 					{
 						id: 'state',
@@ -425,7 +382,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				callback: async ({ options }: { options: any }) => await this._api?.setPowerState(options.state),
 			},
 			mute: {
-				label: 'Mute/Unmute',
+				name: 'Mute/Unmute',
 				options: [
 					{
 						id: 'mute',
@@ -437,7 +394,7 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 				callback: async ({ options }: { options: any }) => await this._api?.setMute(options.mute),
 			},
 			wakeOnLan: {
-				label: 'Wake On LAN',
+				name: 'Wake On LAN',
 				options: [],
 				callback: async () => await this._api?.wakeOnLan(),
 			},
@@ -445,4 +402,4 @@ class instance extends InstanceSkel<IiyamaProliteConfig> {
 	}
 }
 
-exports = module.exports = instance
+runEntrypoint(ProliteInstance, [])
