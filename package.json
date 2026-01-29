@@ -24,7 +24,7 @@
     "wake_on_lan": "^1.0.0"
   },
   "devDependencies": {
-    "@companion-module/tools": "^1.4.1",
+    "@companion-module/tools": "^1.5.2",
     "@types/node": "^18.19.3",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
