@@ -17,14 +17,14 @@
   },
   "prettier": "@companion-module/tools/.prettierrc.json",
   "dependencies": {
-    "@companion-module/base": "~1.6.0",
+    "@companion-module/base": "~1.15.1",
     "node-arp": "^1.0.6",
     "promise-socket": "^7.0.0",
     "queue-promise": "^2.2.1",
     "wake_on_lan": "^1.0.0"
   },
   "devDependencies": {
-    "@companion-module/tools": "^2.8.0",
+    "@companion-module/tools": "^2.9.1",
     "@types/node": "^18.19.3",
     "rimraf": "^5.0.5",
     "ts-node": "^10.9.2",
